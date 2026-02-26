@@ -8,9 +8,11 @@ The project targets three outcomes:
 - Detect suspicious transactions with explainable ML signals.
 - Give merchants self-service answers through SQL/AI agents and a dashboard.
 - Keep ingestion claims technically honest with explicit `live`, `fallback`, and `calibrated` provenance.
+
 ## 🎬 Demo
 
-[▶️ Watch MerchantMind Demo](merchandmint-ai.mp4)
+[![Canva Demo](https://img.shields.io/badge/🎥_Watch_Demo-MerchantMind_Canva-green?style=for-the-badge)](https://www.canva.com/design/DAHCZTAOlSo/14dgaSQdtyrGb__-usiuPQ/edit?utm_content=DAHCZTAOlSo&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton)
+
 ## How It Works
 1. **Ingestion + truth model**
    - Runs 7 sources through `run_full_ingestion.py`.
