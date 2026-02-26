@@ -3,6 +3,15 @@
 MerchantMind is a portfolio-grade, end-to-end AI payment intelligence platform for Australian SMB merchants.
 
 ## Objective
+<p align="center">
+  <a href="https://vimeo.com/reviews/02c8c851-d4c9-49ce-9b32-e7929edf6e91/videos/1168345545" target="_blank" rel="noopener noreferrer">
+    <img src="https://vumbnail.com/1168345545.jpg" alt="MerchantMind Demo Video" width="900" />
+  </a>
+</p>
+<p align="center">
+  <a href="https://vimeo.com/reviews/02c8c851-d4c9-49ce-9b32-e7929edf6e91/videos/1168345545">Watch demo on Vimeo</a>
+</p>
+
 Build a practical, production-style system that shows how fraud detection, merchant analytics, and AI-assisted querying can run in one stack without expensive cloud lock-in.  
 The project targets three outcomes:
 - Detect suspicious transactions with explainable ML signals.
