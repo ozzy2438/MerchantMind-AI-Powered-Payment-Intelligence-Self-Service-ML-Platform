@@ -1,0 +1,17 @@
+# models/chargeback-predictor/model_config.yaml
+model:
+  name: chargeback-predictor
+  model_type: classification
+  framework: xgboost
+  feature_group: merchant_transactions
+
+guardrails:
+  max_inference_latency_ms: 200
+  data_access_scope: same-merchant-only
+  pii_fields: [customer_email]
+  pii_handling: mask
+
+deployment:
+  endpoint_type: serverless
+  auto_scaling: true
+  canary_percentage: 10

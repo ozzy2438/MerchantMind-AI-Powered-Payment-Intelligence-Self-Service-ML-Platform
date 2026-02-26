@@ -1,0 +1,1280 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MerchantMind Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    :root {
+      --bg: #f5f4ee;
+      --bg-alt: #ffffff;
+      --ink: #1f2a2e;
+      --muted: #65707a;
+      --accent: #0f9d94;
+      --accent-soft: #d8f2ef;
+      --warn: #e7764b;
+      --warn-soft: #fce7dd;
+      --line: #d9d7cd;
+      --shadow: 0 10px 30px rgba(26, 39, 43, 0.08);
+      --radius: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Space Grotesk", sans-serif;
+      background:
+        radial-gradient(circle at 10% 10%, #fff7dc 0%, transparent 30%),
+        radial-gradient(circle at 95% 20%, #e4f7f6 0%, transparent 30%),
+        var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      line-height: 1.45;
+    }
+
+    .shell {
+      width: min(1400px, 94vw);
+      margin: 0 auto;
+      padding: 28px 0 34px;
+      animation: rise 0.45s ease both;
+    }
+
+    @keyframes rise {
+      from { transform: translateY(6px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 18px;
+      margin-bottom: 20px;
+    }
+
+    .title {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .title h1 {
+      font-size: clamp(1.4rem, 2.6vw, 2.1rem);
+      letter-spacing: -0.02em;
+      font-weight: 700;
+    }
+
+    .title p {
+      color: var(--muted);
+      font-size: .95rem;
+      max-width: 70ch;
+    }
+
+    .pill {
+      background: var(--bg-alt);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-size: .86rem;
+      color: var(--muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--accent);
+      animation: blink 1.8s ease infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: .35; }
+    }
+
+    .grid-kpi {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .card {
+      background: var(--bg-alt);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius);
+    }
+
+    .kpi {
+      padding: 14px 14px 12px;
+      transition: transform .18s ease, border-color .18s ease;
+    }
+
+    .kpi:hover {
+      transform: translateY(-2px);
+      border-color: #b7ccc8;
+    }
+
+    .kpi .label {
+      color: var(--muted);
+      font-size: .74rem;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-bottom: 6px;
+    }
+
+    .kpi .value {
+      font-size: 1.45rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .kpi .value.warn { color: var(--warn); }
+    .kpi .value.good { color: var(--accent); }
+
+    .grid-main {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .chart-card {
+      padding: 14px;
+      min-height: 320px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .chart-card h3,
+    .panel h3 {
+      font-size: .96rem;
+      letter-spacing: .01em;
+    }
+
+    .chart-wrap {
+      flex: 1;
+      min-height: 250px;
+      position: relative;
+    }
+
+    .grid-bottom {
+      display: grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .panel {
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .chat {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fbfbf8;
+      min-height: 210px;
+      max-height: 240px;
+      overflow: auto;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .msg {
+      padding: 9px 11px;
+      border-radius: 10px;
+      font-size: .9rem;
+    }
+
+    .msg.user {
+      background: #e7f3f1;
+      margin-left: 38px;
+    }
+
+    .msg.agent {
+      background: #fff2eb;
+      margin-right: 38px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+    }
+
+    input, select, button {
+      font: inherit;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      padding: 10px 11px;
+      background: #fff;
+      color: var(--ink);
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: #9fc6bf;
+      box-shadow: 0 0 0 3px #e6f6f4;
+    }
+
+    button {
+      border: 0;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+      transition: filter .15s ease;
+    }
+
+    button:hover { filter: brightness(0.95); }
+
+    .score-fields {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .score-result {
+      border-radius: 10px;
+      padding: 10px 11px;
+      font-size: .9rem;
+      border: 1px solid transparent;
+      display: none;
+    }
+
+    .score-result.low { display: block; background: var(--accent-soft); border-color: #a7d7d2; }
+    .score-result.medium { display: block; background: #fff6dd; border-color: #e8cb6d; }
+    .score-result.high, .score-result.critical { display: block; background: var(--warn-soft); border-color: #e7af95; }
+
+    .table-card {
+      padding: 10px 14px 14px;
+    }
+
+    .table-card h3 {
+      font-size: .96rem;
+      margin: 4px 0 10px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .87rem;
+    }
+
+    th, td {
+      text-align: left;
+      border-bottom: 1px solid var(--line);
+      padding: 8px 6px;
+    }
+
+    th {
+      color: var(--muted);
+      font-weight: 500;
+      font-size: .79rem;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+
+    .mono {
+      font-family: "IBM Plex Mono", monospace;
+      letter-spacing: -0.01em;
+      font-size: .84rem;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .error {
+      background: var(--warn-soft);
+      border: 1px solid #e7af95;
+      color: #883211;
+      padding: 8px 10px;
+      border-radius: 10px;
+      font-size: .86rem;
+    }
+
+    .live-grid {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .map-card,
+    .feed-card {
+      padding: 14px;
+    }
+
+    .map-subtitle,
+    .feed-subtitle {
+      color: var(--muted);
+      font-size: .85rem;
+      margin-top: 4px;
+      margin-bottom: 8px;
+    }
+
+    .map-wrap {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #dce7f0;
+      overflow: hidden;
+      min-height: 340px;
+    }
+
+    .map-canvas {
+      width: 100%;
+      height: 340px;
+    }
+
+    .map-legend {
+      margin-top: 8px;
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      flex-wrap: wrap;
+      font-size: .8rem;
+      color: var(--muted);
+    }
+
+    .map-legend .swatch {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      margin-right: 6px;
+      border: 1px solid #ffffff;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+
+    .map-legend .swatch.low { background: #2f9e8f; }
+    .map-legend .swatch.medium { background: #e88e52; }
+    .map-legend .swatch.high { background: #cf2e2e; }
+
+    .leaflet-container {
+      font-family: "Space Grotesk", sans-serif;
+    }
+
+    .leaflet-control-layers {
+      border-radius: 10px;
+      border: 1px solid #c9d4df;
+      box-shadow: 0 4px 14px rgba(15, 34, 54, 0.15);
+    }
+
+    .leaflet-tooltip.threat-label {
+      background: rgba(255, 255, 255, 0.88);
+      border: 1px solid #d2dee8;
+      border-radius: 8px;
+      color: #2f4050;
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 11px;
+      padding: 3px 6px;
+    }
+
+    .map-summary {
+      margin-top: 8px;
+      font-size: .88rem;
+      color: #4b5a63;
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .feed-list {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fbfbf8;
+      min-height: 260px;
+      max-height: 290px;
+      overflow: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .feed-item {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 10px;
+      align-items: center;
+      padding: 8px 10px;
+      border-bottom: 1px solid #ece9dd;
+      font-size: .84rem;
+    }
+
+    .feed-item:last-child { border-bottom: 0; }
+
+    .feed-left {
+      font-size: 1rem;
+      line-height: 1;
+    }
+
+    .feed-main {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .feed-main .line1 {
+      font-size: .84rem;
+      color: #1f2a2e;
+    }
+
+    .feed-main .line2 {
+      color: var(--muted);
+      font-size: .78rem;
+    }
+
+    .risk-badge {
+      font-size: .72rem;
+      font-weight: 700;
+      border-radius: 999px;
+      padding: 3px 8px;
+      color: #fff;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+
+    .risk-badge.low { background: #4f9f92; }
+    .risk-badge.medium { background: #c68a2d; }
+    .risk-badge.high { background: #d86f47; }
+    .risk-badge.critical { background: #b53a28; }
+
+    .feed-empty {
+      color: var(--muted);
+      font-size: .86rem;
+      padding: 10px;
+    }
+
+    @media (max-width: 1150px) {
+      .grid-kpi { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .grid-bottom { grid-template-columns: 1fr; }
+      .live-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 760px) {
+      .shell { width: min(100%, 95vw); padding-top: 18px; }
+      .header { flex-direction: column; align-items: stretch; }
+      .grid-kpi { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .grid-main { grid-template-columns: 1fr; }
+      .score-fields { grid-template-columns: 1fr; }
+      .row { grid-template-columns: 1fr; }
+      .msg.user, .msg.agent { margin: 0; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="header">
+      <div class="title">
+        <h1>MerchantMind • Payment Intelligence Console</h1>
+        <p>DuckDB tabanlı fraud observability paneli. Bu demo, ingestion truth modelini ve model skorlamayı aynı uygulamada gösterir.</p>
+      </div>
+      <div class="pill"><span class="dot"></span><span id="status">Connecting...</span></div>
+    </section>
+
+    <section class="grid-kpi">
+      <article class="card kpi"><div class="label">Transactions</div><div id="kpi-tx" class="value">-</div></article>
+      <article class="card kpi"><div class="label">Volume (AUD)</div><div id="kpi-volume" class="value good">-</div></article>
+      <article class="card kpi"><div class="label">Merchants</div><div id="kpi-merchants" class="value">-</div></article>
+      <article class="card kpi"><div class="label">Avg Ticket</div><div id="kpi-avg" class="value">-</div></article>
+      <article class="card kpi"><div class="label">Fraud Rate</div><div id="kpi-fraud" class="value warn">-</div></article>
+      <article class="card kpi"><div class="label">Model AUC (Training)</div><div id="kpi-auc" class="value good">0.83+</div></article>
+    </section>
+
+    <section id="error-box"></section>
+
+    <section class="grid-main">
+      <article class="card chart-card">
+        <h3>Revenue by Category</h3>
+        <div class="chart-wrap"><canvas id="chart-category"></canvas></div>
+      </article>
+      <article class="card chart-card">
+        <h3>Hourly Volume vs Fraud</h3>
+        <div class="chart-wrap"><canvas id="chart-hourly"></canvas></div>
+      </article>
+      <article class="card chart-card">
+        <h3>Fraud by State</h3>
+        <div class="chart-wrap"><canvas id="chart-state"></canvas></div>
+      </article>
+      <article class="card chart-card">
+        <h3>Payment Terminals</h3>
+        <div class="chart-wrap"><canvas id="chart-terminal"></canvas></div>
+      </article>
+    </section>
+
+    <section class="live-grid">
+      <article class="card map-card">
+        <h3>Live Threat Map (Australia)</h3>
+        <p class="map-subtitle">Real-world basemap + state threat bubbles (last 30 days)</p>
+        <div class="map-wrap">
+          <div id="au-map" class="map-canvas" role="img" aria-label="Australia threat map"></div>
+        </div>
+        <div class="map-legend">
+          <span><i class="swatch low"></i>Low Threat</span>
+          <span><i class="swatch medium"></i>Medium Threat</span>
+          <span><i class="swatch high"></i>High Threat</span>
+        </div>
+        <div class="map-summary">
+          <span id="map-total-fraud">Fraud alerts: 0</span>
+          <span id="map-total-value">Potential value: $0.00</span>
+        </div>
+      </article>
+
+      <article class="card feed-card">
+        <h3>Live Transaction Feed</h3>
+        <p class="feed-subtitle">Refreshing every 5s (latest 10)</p>
+        <div id="live-feed" class="feed-list">
+          <div class="feed-empty">Waiting for feed...</div>
+        </div>
+      </article>
+    </section>
+
+    <section class="grid-bottom">
+      <article class="card panel">
+        <h3>Agent Query (merchant-scoped)</h3>
+        <div id="chat-box" class="chat">
+          <div class="msg agent">Ask: "Fraud summary for M00001" or "Peak hour for M00001".</div>
+        </div>
+        <div class="row">
+          <input id="agent-input" type="text" placeholder="Question with merchant id (e.g. revenue for M00001)" />
+          <button id="agent-btn" type="button">Ask Agent</button>
+        </div>
+      </article>
+
+      <article class="card panel">
+        <h3>Real-time Score</h3>
+        <div class="score-fields">
+          <input id="score-merchant" type="text" value="M00001" placeholder="Merchant ID" />
+          <input id="score-amount" type="number" value="500" min="1" step="0.01" placeholder="Amount (AUD)" />
+          <input id="score-hour" type="number" value="14" min="0" max="23" placeholder="Hour" />
+          <select id="score-terminal">
+            <option value="tap_and_go">Tap & Go</option>
+            <option value="chip_and_pin">Chip & PIN</option>
+            <option value="eftpos">EFTPOS</option>
+            <option value="manual_entry">Manual Entry</option>
+          </select>
+        </div>
+        <button id="score-btn" type="button">Score Transaction</button>
+        <div id="score-result" class="score-result"></div>
+      </article>
+    </section>
+
+    <section class="card table-card">
+      <h3>Top Merchants by Revenue</h3>
+      <div style="overflow:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Merchant</th>
+              <th>Category</th>
+              <th>State</th>
+              <th>Transactions</th>
+              <th>Revenue</th>
+              <th>Avg Ticket</th>
+            </tr>
+          </thead>
+          <tbody id="merchant-tbody"></tbody>
+        </table>
+      </div>
+      <p id="table-empty" class="muted" style="display:none; margin-top:10px;">No merchant rows returned.</p>
+    </section>
+  </main>
+
+  <script>
+    const palette = {
+      teal: '#0f9d94',
+      tealSoft: '#d8f2ef',
+      orange: '#e7764b',
+      amber: '#d9a337',
+      slate: '#4d5f69',
+      mint: '#7bc4ba',
+      sand: '#edd9b1',
+      coral: '#f2a68a'
+    };
+
+    let charts = [];
+    let liveInterval = null;
+    let mapProvider = 'leaflet';
+    let googleMapsApiKey = '';
+    let mapConfigLoaded = false;
+    let auMap = null; // Leaflet instance
+    let threatMarkers = {};
+    let googleMap = null;
+    let googleThreatOverlays = {};
+    let googleInfoWindow = null;
+
+    const STATE_COORDS = {
+      WA: [-31.9523, 115.8613],
+      NT: [-12.4634, 130.8456],
+      SA: [-34.9285, 138.6007],
+      QLD: [-27.4698, 153.0251],
+      NSW: [-33.8688, 151.2093],
+      VIC: [-37.8136, 144.9631],
+      TAS: [-42.8821, 147.3272],
+      ACT: [-35.2809, 149.13]
+    };
+
+    function showError(msg) {
+      const box = document.getElementById('error-box');
+      box.innerHTML = `<div class="error">${msg}</div>`;
+    }
+
+    function clearError() {
+      document.getElementById('error-box').innerHTML = '';
+    }
+
+    function addChat(text, role = 'agent') {
+      const box = document.getElementById('chat-box');
+      const div = document.createElement('div');
+      div.className = `msg ${role}`;
+      div.textContent = text;
+      box.appendChild(div);
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function safeJSON(res) {
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.json();
+    }
+
+    function formatMoney(v) {
+      return `$${Number(v || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
+    }
+
+    function destroyCharts() {
+      charts.forEach(c => c.destroy());
+      charts = [];
+    }
+
+    async function loadMapConfig() {
+      if (mapConfigLoaded) return;
+      try {
+        const cfg = await fetch('/api/config/public').then(safeJSON);
+        mapProvider = String(cfg.map_provider || 'leaflet').toLowerCase();
+        googleMapsApiKey = String(cfg.google_maps_js_api_key || '');
+      } catch (_) {
+        mapProvider = 'leaflet';
+        googleMapsApiKey = '';
+      } finally {
+        mapConfigLoaded = true;
+      }
+    }
+
+    async function loadGoogleMapsScript(apiKey) {
+      if (window.google && window.google.maps) return;
+      const existing = document.getElementById('google-maps-sdk');
+      if (existing) {
+        await new Promise((resolve, reject) => {
+          const timer = window.setTimeout(() => reject(new Error('Google Maps load timeout')), 12000);
+          existing.addEventListener('load', () => {
+            window.clearTimeout(timer);
+            resolve();
+          }, { once: true });
+          existing.addEventListener('error', () => {
+            window.clearTimeout(timer);
+            reject(new Error('Google Maps SDK failed'));
+          }, { once: true });
+        });
+        return;
+      }
+      await new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.id = 'google-maps-sdk';
+        script.async = true;
+        script.defer = true;
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}&v=quarterly`;
+        script.onload = resolve;
+        script.onerror = () => reject(new Error('Google Maps SDK failed'));
+        document.head.appendChild(script);
+      });
+    }
+
+    async function initThreatMapIfNeeded() {
+      await loadMapConfig();
+
+      if (mapProvider === 'google' && googleMapsApiKey) {
+        await initGoogleMapIfNeeded();
+        return;
+      }
+
+      initLeafletMapIfNeeded();
+    }
+
+    function initLeafletMapIfNeeded() {
+      if (auMap || !window.L) return;
+
+      auMap = L.map('au-map', {
+        zoomControl: true,
+        scrollWheelZoom: false,
+        minZoom: 3,
+        maxZoom: 8
+      }).setView([-25.2744, 133.7751], 4);
+
+      const light = L.tileLayer(
+        'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+        {
+          attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+          subdomains: 'abcd',
+          maxZoom: 20
+        }
+      );
+      const dark = L.tileLayer(
+        'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+        {
+          attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+          subdomains: 'abcd',
+          maxZoom: 20
+        }
+      );
+      const satellite = L.tileLayer(
+        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+        {
+          attribution: 'Tiles &copy; Esri'
+        }
+      );
+
+      light.addTo(auMap);
+      L.control.layers(
+        {
+          Light: light,
+          Dark: dark,
+          Satellite: satellite
+        },
+        {},
+        { collapsed: true, position: 'topright' }
+      ).addTo(auMap);
+
+      auMap.setMaxBounds([
+        [-49.5, 108.0],
+        [-8.0, 160.5]
+      ]);
+      window.setTimeout(() => auMap.invalidateSize(), 120);
+    }
+
+    async function initGoogleMapIfNeeded() {
+      if (googleMap) return;
+      try {
+        await loadGoogleMapsScript(googleMapsApiKey);
+      } catch (err) {
+        console.error('google maps load failed, falling back to leaflet', err);
+        mapProvider = 'leaflet';
+        initLeafletMapIfNeeded();
+        return;
+      }
+
+      if (!(window.google && window.google.maps)) {
+        mapProvider = 'leaflet';
+        initLeafletMapIfNeeded();
+        return;
+      }
+
+      const mapEl = document.getElementById('au-map');
+      googleMap = new google.maps.Map(mapEl, {
+        center: { lat: -25.2744, lng: 133.7751 },
+        zoom: 4,
+        minZoom: 3,
+        maxZoom: 8,
+        mapTypeId: 'roadmap',
+        mapTypeControl: true,
+        streetViewControl: false,
+        fullscreenControl: false,
+        rotateControl: true,
+        gestureHandling: 'greedy',
+      });
+      googleInfoWindow = new google.maps.InfoWindow();
+    }
+
+    function hexToRgb(hex) {
+      const clean = hex.replace('#', '');
+      return {
+        r: parseInt(clean.substring(0, 2), 16),
+        g: parseInt(clean.substring(2, 4), 16),
+        b: parseInt(clean.substring(4, 6), 16)
+      };
+    }
+
+    function rgbToHex(r, g, b) {
+      const toHex = (x) => Math.max(0, Math.min(255, x)).toString(16).padStart(2, '0');
+      return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+    }
+
+    function lerpColor(startHex, endHex, t) {
+      const s = hexToRgb(startHex);
+      const e = hexToRgb(endHex);
+      const r = Math.round(s.r + (e.r - s.r) * t);
+      const g = Math.round(s.g + (e.g - s.g) * t);
+      const b = Math.round(s.b + (e.b - s.b) * t);
+      return rgbToHex(r, g, b);
+    }
+
+    function threatColor(fraudCount, maxFraud) {
+      if (fraudCount <= 0) return '#2f9e8f';
+      const t = Math.max(0, Math.min(1, fraudCount / Math.max(maxFraud, 1)));
+      return lerpColor('#e88e52', '#cf2e2e', t);
+    }
+
+    function threatRadius(fraudCount, maxFraud) {
+      if (fraudCount <= 0) return 8;
+      const t = Math.max(0, Math.min(1, fraudCount / Math.max(maxFraud, 1)));
+      return 10 + (t * 16);
+    }
+
+    function normalizeRisk(riskLevel) {
+      const value = String(riskLevel || 'LOW').toLowerCase();
+      if (['low', 'medium', 'high', 'critical'].includes(value)) return value;
+      return 'low';
+    }
+
+    async function loadHealth() {
+      const data = await fetch('/api/health').then(safeJSON);
+      const status = data.status === 'healthy' ? 'Online' : 'Degraded';
+      document.getElementById('status').textContent = `${status} • ${Number(data.transactions_loaded || 0).toLocaleString()} txns`;
+    }
+
+    async function loadOverview() {
+      const data = await fetch('/api/dashboard/overview').then(safeJSON);
+      document.getElementById('kpi-tx').textContent = Number(data.total_transactions || 0).toLocaleString();
+      document.getElementById('kpi-volume').textContent = formatMoney(data.total_volume_aud || 0);
+      document.getElementById('kpi-merchants').textContent = Number(data.total_merchants || 0).toLocaleString();
+      document.getElementById('kpi-avg').textContent = formatMoney(data.avg_transaction_aud || 0);
+      document.getElementById('kpi-fraud').textContent = `${Number(data.fraud_rate_pct || 0).toFixed(4)}%`;
+    }
+
+    async function loadTopMerchants() {
+      const rows = await fetch('/api/dashboard/top-merchants?limit=10').then(safeJSON);
+      const tbody = document.getElementById('merchant-tbody');
+      const empty = document.getElementById('table-empty');
+      tbody.innerHTML = '';
+
+      if (!Array.isArray(rows) || rows.length === 0) {
+        empty.style.display = 'block';
+        return;
+      }
+      empty.style.display = 'none';
+
+      rows.forEach((r) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="mono">${r.merchant_id || '-'}</td>
+          <td>${r.merchant_category || '-'}</td>
+          <td>${r.state || '-'}</td>
+          <td>${Number(r.transaction_count || 0).toLocaleString()}</td>
+          <td>${formatMoney(r.total_revenue || 0)}</td>
+          <td>${formatMoney(r.avg_ticket || 0)}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function loadThreatMap() {
+      const payload = await fetch('/api/dashboard/threat-map?days=30').then(safeJSON);
+      const states = Array.isArray(payload.states) ? payload.states : [];
+      await initThreatMapIfNeeded();
+
+      const maxFraud = Math.max(...states.map((row) => Number(row.fraud_count || 0)), 1);
+      if (mapProvider === 'google' && googleMap && window.google && window.google.maps) {
+        states.forEach((row) => {
+          const code = String(row.state || '').toUpperCase();
+          const coords = STATE_COORDS[code];
+          if (!coords) return;
+
+          const fraudCount = Number(row.fraud_count || 0);
+          const fraudRate = Number(row.fraud_rate_pct || 0);
+          const fraudValue = Number(row.fraud_value_aud || 0);
+          const totalTx = Number(row.transaction_count || 0);
+          const color = threatColor(fraudCount, maxFraud);
+          const radius = threatRadius(fraudCount, maxFraud);
+          const center = { lat: coords[0], lng: coords[1] };
+
+          if (!googleThreatOverlays[code]) {
+            const circle = new google.maps.Circle({
+              map: googleMap,
+              center,
+              radius: 55000 + radius * 5200,
+              strokeColor: '#ffffff',
+              strokeOpacity: 1,
+              strokeWeight: 2,
+              fillColor: color,
+              fillOpacity: fraudCount > 0 ? 0.78 : 0.5,
+            });
+            const labelMarker = new google.maps.Marker({
+              map: googleMap,
+              position: center,
+              icon: {
+                path: google.maps.SymbolPath.CIRCLE,
+                scale: 0,
+                fillOpacity: 0,
+                strokeOpacity: 0,
+              },
+              label: {
+                text: `${code} ${fraudCount}`,
+                color: '#1f2a2e',
+                fontSize: '11px',
+                fontWeight: '700',
+              },
+            });
+            const overlay = { circle, labelMarker, popupHtml: '' };
+            circle.addListener('click', () => {
+              if (googleInfoWindow && overlay.popupHtml) {
+                googleInfoWindow.setContent(overlay.popupHtml);
+                googleInfoWindow.setPosition(center);
+                googleInfoWindow.open(googleMap);
+              }
+            });
+            labelMarker.addListener('click', () => {
+              if (googleInfoWindow && overlay.popupHtml) {
+                googleInfoWindow.setContent(overlay.popupHtml);
+                googleInfoWindow.setPosition(center);
+                googleInfoWindow.open(googleMap);
+              }
+            });
+            googleThreatOverlays[code] = overlay;
+          }
+
+          const overlay = googleThreatOverlays[code];
+          overlay.circle.setCenter(center);
+          overlay.circle.setRadius(55000 + radius * 5200);
+          overlay.circle.setOptions({
+            fillColor: color,
+            fillOpacity: fraudCount > 0 ? 0.78 : 0.5,
+          });
+          overlay.labelMarker.setPosition(center);
+          overlay.labelMarker.setLabel({
+            text: `${code} ${fraudCount}`,
+            color: '#1f2a2e',
+            fontSize: '11px',
+            fontWeight: '700',
+          });
+
+          const popupHtml =
+            `<strong>${code}</strong><br>` +
+            `Fraud alerts: ${fraudCount}<br>` +
+            `Fraud rate: ${fraudRate.toFixed(4)}%<br>` +
+            `Potential value: ${formatMoney(fraudValue)}<br>` +
+            `Transactions: ${totalTx.toLocaleString()}`;
+          overlay.popupHtml = popupHtml;
+        });
+      } else if (auMap && window.L) {
+        states.forEach((row) => {
+          const code = String(row.state || '').toUpperCase();
+          const coords = STATE_COORDS[code];
+          if (!coords) return;
+
+          const fraudCount = Number(row.fraud_count || 0);
+          const fraudRate = Number(row.fraud_rate_pct || 0);
+          const fraudValue = Number(row.fraud_value_aud || 0);
+          const totalTx = Number(row.transaction_count || 0);
+          const color = threatColor(fraudCount, maxFraud);
+          const radius = threatRadius(fraudCount, maxFraud);
+
+          if (!threatMarkers[code]) {
+            threatMarkers[code] = L.circleMarker(coords, {
+              radius,
+              color: '#ffffff',
+              weight: 2,
+              fillColor: color,
+              fillOpacity: fraudCount > 0 ? 0.8 : 0.56
+            }).addTo(auMap);
+
+            threatMarkers[code].bindTooltip('', {
+              permanent: true,
+              direction: 'bottom',
+              offset: [0, 10],
+              className: 'threat-label'
+            });
+          }
+
+          const marker = threatMarkers[code];
+          marker.setLatLng(coords);
+          marker.setRadius(radius);
+          marker.setStyle({
+            color: '#ffffff',
+            weight: 2,
+            fillColor: color,
+            fillOpacity: fraudCount > 0 ? 0.8 : 0.56
+          });
+          marker.setTooltipContent(`${code} ${fraudCount}`);
+          marker.bindPopup(
+            `<strong>${code}</strong><br>` +
+            `Fraud alerts: ${fraudCount}<br>` +
+            `Fraud rate: ${fraudRate.toFixed(4)}%<br>` +
+            `Potential value: ${formatMoney(fraudValue)}<br>` +
+            `Transactions: ${totalTx.toLocaleString()}`
+          );
+        });
+      }
+
+      document.getElementById('map-total-fraud').textContent =
+        `Fraud alerts: ${Number(payload.total_fraud_count || 0).toLocaleString()}`;
+      document.getElementById('map-total-value').textContent =
+        `Potential value: ${formatMoney(payload.total_fraud_value_aud || 0)}`;
+    }
+
+    async function loadLiveFeed() {
+      const payload = await fetch('/api/live-feed?limit=10').then(safeJSON);
+      const rows = Array.isArray(payload.transactions) ? payload.transactions : [];
+      const feed = document.getElementById('live-feed');
+
+      if (rows.length === 0) {
+        feed.innerHTML = '<div class="feed-empty">No transactions returned.</div>';
+        return;
+      }
+
+      feed.innerHTML = rows.map((row) => {
+        const risk = normalizeRisk(row.risk_level);
+        const icon = row.is_anomaly ? '🔴' : '🟢';
+        const terminal = String(row.payment_terminal || '').replaceAll('_', ' ');
+        return `
+          <div class="feed-item">
+            <div class="feed-left">${icon}</div>
+            <div class="feed-main">
+              <div class="line1 mono">${row.merchant_id} • ${formatMoney(row.amount_aud)} • ${row.state}</div>
+              <div class="line2">${terminal} • score ${Number(row.anomaly_score || 0).toFixed(4)}</div>
+            </div>
+            <div class="risk-badge ${risk}">${risk}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function chartBaseOptions() {
+      return {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { labels: { color: '#52626c', font: { family: 'Space Grotesk' } } }
+        },
+        scales: {
+          x: { ticks: { color: '#60717b', font: { family: 'IBM Plex Mono', size: 11 } }, grid: { color: '#ece8dc' } },
+          y: { ticks: { color: '#60717b', font: { family: 'IBM Plex Mono', size: 11 } }, grid: { color: '#ece8dc' } }
+        }
+      };
+    }
+
+    async function loadCharts() {
+      const [cat, hourly, state, terminal] = await Promise.all([
+        fetch('/api/dashboard/revenue-by-category').then(safeJSON),
+        fetch('/api/dashboard/hourly-pattern').then(safeJSON),
+        fetch('/api/dashboard/fraud-by-state').then(safeJSON),
+        fetch('/api/dashboard/payment-methods').then(safeJSON)
+      ]);
+
+      destroyCharts();
+
+      charts.push(new Chart(document.getElementById('chart-category'), {
+        type: 'doughnut',
+        data: {
+          labels: cat.map(x => x.category),
+          datasets: [{
+            data: cat.map(x => x.total_revenue),
+            backgroundColor: [palette.teal, palette.orange, palette.amber, palette.mint],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'bottom', labels: { color: '#52626c', font: { family: 'Space Grotesk' } } },
+            tooltip: { callbacks: { label: (ctx) => ` ${formatMoney(ctx.parsed)} AUD` } }
+          }
+        }
+      }));
+
+      charts.push(new Chart(document.getElementById('chart-hourly'), {
+        data: {
+          labels: hourly.map(x => `${x.hour}:00`),
+          datasets: [
+            {
+              type: 'bar',
+              label: 'Transactions',
+              data: hourly.map(x => x.transaction_count),
+              backgroundColor: '#0f9d9466',
+              borderColor: palette.teal,
+              borderWidth: 1,
+              yAxisID: 'y'
+            },
+            {
+              type: 'line',
+              label: 'Fraud',
+              data: hourly.map(x => x.fraud_count),
+              borderColor: palette.orange,
+              backgroundColor: '#e7764b33',
+              fill: true,
+              tension: .3,
+              yAxisID: 'y1'
+            }
+          ]
+        },
+        options: {
+          ...chartBaseOptions(),
+          interaction: { mode: 'index', intersect: false },
+          scales: {
+            x: chartBaseOptions().scales.x,
+            y: { ...chartBaseOptions().scales.y, position: 'left' },
+            y1: { ...chartBaseOptions().scales.y, position: 'right', grid: { display: false } }
+          }
+        }
+      }));
+
+      charts.push(new Chart(document.getElementById('chart-state'), {
+        type: 'bar',
+        data: {
+          labels: state.map(x => x.state),
+          datasets: [{
+            label: 'Fraud Count',
+            data: state.map(x => x.fraud_count),
+            backgroundColor: [palette.orange, palette.teal, palette.amber, palette.slate, palette.mint, palette.sand, palette.coral, '#9eb8c5'],
+            borderWidth: 0,
+            borderRadius: 4
+          }]
+        },
+        options: {
+          ...chartBaseOptions(),
+          indexAxis: 'y',
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                afterLabel: (ctx) => {
+                  const row = state[ctx.dataIndex] || {};
+                  return `Rate: ${row.fraud_rate_pct || 0}% | Value: ${formatMoney(row.fraud_value_aud || 0)}`;
+                }
+              }
+            }
+          }
+        }
+      }));
+
+      charts.push(new Chart(document.getElementById('chart-terminal'), {
+        type: 'pie',
+        data: {
+          labels: terminal.map(x => String(x.payment_terminal || '').replaceAll('_', ' ')),
+          datasets: [{
+            data: terminal.map(x => x.count),
+            backgroundColor: [palette.teal, palette.amber, palette.slate, palette.orange],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'bottom', labels: { color: '#52626c', font: { family: 'Space Grotesk' } } }
+          }
+        }
+      }));
+    }
+
+    async function askAgent() {
+      const input = document.getElementById('agent-input');
+      const text = input.value.trim();
+      if (!text) return;
+
+      addChat(text, 'user');
+      input.value = '';
+
+      const m = text.match(/M\d{5}/i);
+      const merchant = m ? m[0].toUpperCase() : 'M00001';
+
+      try {
+        const data = await fetch('/api/agent/query', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question: text, merchant_id: merchant })
+        }).then(safeJSON);
+        addChat(data.response || 'No response', 'agent');
+      } catch (err) {
+        addChat(`Agent error: ${err.message}`, 'agent');
+      }
+    }
+
+    async function scoreTxn() {
+      const merchant_id = document.getElementById('score-merchant').value.trim() || 'M00001';
+      const amount_aud = Number(document.getElementById('score-amount').value || 0);
+      const hour_of_day = Number(document.getElementById('score-hour').value || 0);
+      const payment_terminal = document.getElementById('score-terminal').value;
+
+      const box = document.getElementById('score-result');
+      try {
+        const data = await fetch('/api/score', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ merchant_id, amount_aud, hour_of_day, payment_terminal })
+        }).then(safeJSON);
+
+        const cls = String(data.risk_level || 'LOW').toLowerCase();
+        box.className = `score-result ${cls}`;
+        box.innerHTML = `
+          <strong>${data.risk_level}</strong> • score ${Number(data.anomaly_score).toFixed(4)} (threshold ${Number(data.threshold_used).toFixed(4)})<br>
+          Mode: ${data.scoring_mode}<br>
+          Z-score: ${data.explanation?.amount_zscore} • Merchant avg: ${data.explanation?.merchant_avg}
+        `;
+      } catch (err) {
+        box.className = 'score-result high';
+        box.innerHTML = `Scoring error: ${err.message}`;
+      }
+    }
+
+    async function init() {
+      clearError();
+      try {
+        await loadHealth();
+        await Promise.all([loadOverview(), loadCharts(), loadTopMerchants(), loadThreatMap(), loadLiveFeed()]);
+        if (liveInterval) window.clearInterval(liveInterval);
+        liveInterval = window.setInterval(async () => {
+          try {
+            await Promise.all([loadThreatMap(), loadLiveFeed()]);
+          } catch (err) {
+            console.error('live refresh failed', err);
+          }
+        }, 5000);
+      } catch (err) {
+        showError(`Dashboard bootstrap failed: ${err.message}`);
+      }
+    }
+
+    document.getElementById('agent-btn').addEventListener('click', askAgent);
+    document.getElementById('score-btn').addEventListener('click', scoreTxn);
+    document.getElementById('agent-input').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') askAgent();
+    });
+    window.addEventListener('resize', () => {
+      if (auMap) {
+        auMap.invalidateSize();
+      }
+      if (googleMap && window.google && window.google.maps) {
+        const center = googleMap.getCenter();
+        window.google.maps.event.trigger(googleMap, 'resize');
+        if (center) {
+          googleMap.setCenter(center);
+        }
+      }
+    });
+
+    init();
+  </script>
+</body>
+</html>

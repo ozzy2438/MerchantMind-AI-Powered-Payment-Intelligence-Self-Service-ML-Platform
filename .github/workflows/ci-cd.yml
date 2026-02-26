@@ -1,0 +1,116 @@
+# .github/workflows/ci-cd.yml
+name: MerchantMind CI/CD
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+env:
+  AWS_REGION: ap-southeast-2
+  ECR_REPOSITORY: merchantmind-api
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install tools
+        run: pip install ruff mypy
+      - name: Ruff lint
+        run: ruff check src/ tests/
+      - name: Type check
+        run: mypy src/ --ignore-missing-imports
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install -r requirements.txt -r requirements-dev.txt
+      - name: Unit tests
+        run: pytest tests/unit -v --cov=src --cov-report=xml --cov-fail-under=80
+      - name: Data contract tests
+        run: pytest tests/data_contracts -v
+      - name: Integration tests
+        run: pytest tests/integration -v
+        env:
+          USE_MOCKS: "true"
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bandit security scan
+        run: |
+          pip install bandit
+          bandit -r src/ -f json -o security-report.json -ll
+      - name: Dependency vulnerability check
+        run: |
+          pip install safety
+          safety check --json --output vuln-report.json
+      - name: Upload security reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-reports
+          path: "*-report.json"
+
+  terraform:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - name: Terraform format check
+        run: terraform fmt -check -recursive
+        working-directory: terraform
+      - name: Terraform validate
+        run: |
+          terraform init -backend=false
+          terraform validate
+        working-directory: terraform
+
+  deploy-staging:
+    needs: [lint, test, security, terraform]
+    if: github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_STAGING }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Build & push Docker image
+        run: |
+          : "Set ECR_URI secret or env before production use"
+          aws ecr get-login-password | docker login --username AWS --password-stdin $ECR_URI
+          docker build -t $ECR_URI:$GITHUB_SHA .
+          docker push $ECR_URI:$GITHUB_SHA
+      - name: Deploy infrastructure
+        run: |
+          cd terraform/environments/staging
+          terraform init -backend=false
+          terraform apply -auto-approve -var="image_tag=$GITHUB_SHA"
+      - name: Smoke tests
+        run: pytest tests/smoke -v --base-url=$STAGING_URL
+
+  deploy-production:
+    needs: [deploy-staging]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - name: Responsible AI scorecard (MANDATORY GATE)
+        run: python src/governance/scorecard.py --env production --fail-on-warning
+      - name: Deploy to production
+        run: |
+          cd terraform/environments/prod
+          terraform init -backend=false
+          terraform apply -auto-approve -var="image_tag=$GITHUB_SHA"

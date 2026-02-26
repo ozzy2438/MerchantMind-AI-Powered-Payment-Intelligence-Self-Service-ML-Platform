@@ -1,0 +1,81 @@
+{
+  "generated_at": "2026-02-26T01:55:06.764678+00:00",
+  "source_count": 7,
+  "success_count": 7,
+  "live_success_count": 0,
+  "fallback_success_count": 2,
+  "calibrated_count": 5,
+  "failed_sources": [],
+  "sources": {
+    "abs_retail_trade": {
+      "status": "success",
+      "records": 4,
+      "output_path": "data/external/abs_retail_trade.csv",
+      "mode": "fallback",
+      "live_attempted": true,
+      "live_success": false,
+      "fallback_used": true,
+      "error": "422 Client Error: Unprocessable Entity for url: https://data.api.abs.gov.au:443/rest/data/ABS,RT,1.0.0/.AUS.M/all"
+    },
+    "rba_card_payments": {
+      "status": "success",
+      "records": 4,
+      "output_path": "data/external/rba_card_payments.csv",
+      "mode": "fallback",
+      "live_attempted": true,
+      "live_success": false,
+      "fallback_used": true,
+      "error": "404 Client Error: Not Found for url: https://www.rba.gov.au/statistics/tables/csv/tables-d1.csv"
+    },
+    "merchant_population": {
+      "status": "success",
+      "records": 8,
+      "output_path": "data/external/merchant_population.csv",
+      "mode": "calibrated",
+      "live_attempted": false,
+      "live_success": false,
+      "fallback_used": false,
+      "error": null
+    },
+    "terminal_mix": {
+      "status": "success",
+      "records": 4,
+      "output_path": "data/external/terminal_mix.csv",
+      "mode": "calibrated",
+      "live_attempted": false,
+      "live_success": false,
+      "fallback_used": false,
+      "error": null
+    },
+    "card_type_mix": {
+      "status": "success",
+      "records": 2,
+      "output_path": "data/external/card_type_mix.csv",
+      "mode": "calibrated",
+      "live_attempted": false,
+      "live_success": false,
+      "fallback_used": false,
+      "error": null
+    },
+    "business_hours_profile": {
+      "status": "success",
+      "records": 4,
+      "output_path": "data/external/business_hours_profile.csv",
+      "mode": "calibrated",
+      "live_attempted": false,
+      "live_success": false,
+      "fallback_used": false,
+      "error": null
+    },
+    "ingestion_metadata": {
+      "status": "success",
+      "records": 1,
+      "output_path": "data/external/ingestion_metadata.csv",
+      "mode": "calibrated",
+      "live_attempted": false,
+      "live_success": false,
+      "fallback_used": false,
+      "error": null
+    }
+  }
+}

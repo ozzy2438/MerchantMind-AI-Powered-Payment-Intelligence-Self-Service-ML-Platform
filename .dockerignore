@@ -1,0 +1,24 @@
+.git
+.github
+.venv
+__pycache__
+*.pyc
+.pytest_cache
+.mypy_cache
+.coverage
+coverage.xml
+.env
+.env.*
+!.env.example
+reports
+notebooks
+docs
+terraform
+tests
+project.md
+
+# Generated artifacts are recreated at container startup.
+data/generated/*
+data/external/*
+!data/generated/.gitkeep
+!data/external/.gitkeep

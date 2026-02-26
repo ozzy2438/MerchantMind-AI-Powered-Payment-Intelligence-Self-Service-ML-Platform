@@ -1,0 +1,45 @@
+{
+  "model_name": "test-model",
+  "evaluation_time": "2026-02-26T01:55:40.198607",
+  "overall_status": "FAILED",
+  "checks": [
+    {
+      "name": "bias_detection",
+      "status": "passed",
+      "detail": "Precision gap: 3.00%. Within acceptable range."
+    },
+    {
+      "name": "explainability",
+      "status": "failed",
+      "detail": "Could not load model artifacts: [Errno 2] No such file or directory: '/private/var/folders/p7/db_fdd8929jc34td4b6dfcg40000gn/T/pytest-of-osmanorka/pytest-2/test_scorecard_runs_with_missi0/missing.joblib'"
+    },
+    {
+      "name": "pii_handling",
+      "status": "passed",
+      "detail": "PII fields ['email'] handled via 'mask' strategy."
+    },
+    {
+      "name": "data_lineage",
+      "status": "passed",
+      "detail": "Features sourced from centralized Feature Store."
+    },
+    {
+      "name": "rollback_plan",
+      "status": "passed",
+      "detail": "Canary deployment at 10%."
+    },
+    {
+      "name": "performance_baseline",
+      "status": "warning",
+      "detail": "Could not read model metrics: [Errno 2] No such file or directory: '/private/var/folders/p7/db_fdd8929jc34td4b6dfcg40000gn/T/pytest-of-osmanorka/pytest-2/test_scorecard_runs_with_missi0/missing.joblib'"
+    },
+    {
+      "name": "security_review",
+      "status": "warning",
+      "detail": "Model artifact not found for integrity checks."
+    }
+  ],
+  "passed_count": 4,
+  "failed_count": 1,
+  "warning_count": 2
+}

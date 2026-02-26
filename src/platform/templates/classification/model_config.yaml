@@ -1,0 +1,16 @@
+model:
+  name: "{{MODEL_NAME}}"
+  model_type: "classification"
+  framework: "xgboost"
+  feature_group: "merchant_transactions"
+
+guardrails:
+  max_inference_latency_ms: 250
+  data_access_scope: "same-merchant-only"
+  pii_fields: []
+  pii_handling: "mask"
+
+deployment:
+  endpoint_type: "serverless"
+  auto_scaling: true
+  canary_percentage: 10
