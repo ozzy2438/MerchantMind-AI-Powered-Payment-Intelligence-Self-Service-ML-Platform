@@ -11,7 +11,11 @@ The project targets three outcomes:
 
 ## 🎬 Demo
 
-https://github.com/ozzy2438/MerchantMind-AI-Powered-Payment-Intelligence-Self-Service-ML-Platform/raw/main/Untitled%20design.mp4
+
+
+https://github.com/user-attachments/assets/4fc01e98-5916-455a-b182-11a6b052b42e
+
+
 
 ## How It Works
 1. **Ingestion + truth model**
