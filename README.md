@@ -10,9 +10,7 @@ The project targets three outcomes:
 - Keep ingestion claims technically honest with explicit `live`, `fallback`, and `calibrated` provenance.
 ## 🎬 Demo
 
-<video width="100%" controls>
-  <source src="merchandmint-ai.mp4" type="video/mp4">
-</video>
+[![MerchantMind Demo](assets/demo.png)](https://raw.githubusercontent.com/ozzy2438/MerchantMind-AI-Powered-Payment-Intelligence-Self-Service-ML-Platform/main/merchandmint-ai.mp4)
 
 ## How It Works
 1. **Ingestion + truth model**
