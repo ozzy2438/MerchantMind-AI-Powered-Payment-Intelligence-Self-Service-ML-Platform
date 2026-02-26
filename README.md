@@ -8,10 +8,11 @@ The project targets three outcomes:
 - Detect suspicious transactions with explainable ML signals.
 - Give merchants self-service answers through SQL/AI agents and a dashboard.
 - Keep ingestion claims technically honest with explicit `live`, `fallback`, and `calibrated` provenance.
-
 ## 🎬 Demo
 
-<https://github.com/ozzy2438/MerchantMind-AI-Powered-Payment-Intelligence-Self-Service-ML-Platform/blob/63fc95dc305340d7965f1feb53cc960e8018079f/merchandmint-ai.mp4>
+<video width="100%" controls>
+  <source src="merchandmint-ai.mp4" type="video/mp4">
+</video>
 
 ## How It Works
 1. **Ingestion + truth model**
