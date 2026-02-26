@@ -11,7 +11,7 @@ The project targets three outcomes:
 
 ## 🎬 Demo
 
-[![🎥 Watch Demo](https://img.shields.io/badge/🎥_Watch_Demo-MerchantMind_Platform_Walkthrough-green?style=for-the-badge)](https://www.canva.com/design/DAHCZTAOlSo/7kvJBRSHHObnwr1oXxrSlg/watch?utm_content=DAHCZTAOlSo&utm_campaign=designshare&utm_medium=embeds&utm_source=link)
+https://github.com/ozzy2438/MerchantMind-AI-Powered-Payment-Intelligence-Self-Service-ML-Platform/raw/main/Untitled%20design.mp4
 
 ## How It Works
 1. **Ingestion + truth model**
