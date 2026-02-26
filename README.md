@@ -3,18 +3,15 @@
 MerchantMind is a portfolio-grade, end-to-end AI payment intelligence platform for Australian SMB merchants.
 
 ## Objective
-Build a practical, production-style system that shows how fraud detection, merchant analytics, and AI-assisted querying can run in one stack without expensive cloud lock-in.  
+Build a practical, production-grade system that demonstrates how fraud detection, merchant analytics, and AI-assisted querying can run on a single stack without expensive cloud lock-in.  
 The project targets three outcomes:
 - Detect suspicious transactions with explainable ML signals.
 - Give merchants self-service answers through SQL/AI agents and a dashboard.
 - Keep ingestion claims technically honest with explicit `live`, `fallback`, and `calibrated` provenance.
 
-<p align="center">
-  <a href="https://vimeo.com/reviews/02c8c851-d4c9-49ce-9b32-e7929edf6e91/videos/1168345545" target="_blank" rel="noopener noreferrer">
-    <img src="docs/assets/merchantmind-demo-thumb.jpg" alt="MerchantMind Demo Video" width="1000" />
-  </a>
-</p>
-<p align="center"><strong>▶ Click preview to play the demo</strong></p>
+## 🎬 Demo
+
+[![MerchantMind Demo](assets/demo-preview.png)](https://raw.githubusercontent.com/ozzy2438/MerchantMind-AI-Powered-Payment-Intelligence-Self-Service-ML-Platform/main/merchandmint-ai.mp4)
 
 ## How It Works
 1. **Ingestion + truth model**
@@ -28,7 +25,7 @@ The project targets three outcomes:
    `transaction_id, merchant_id, merchant_abn, customer_id, amount_aud, currency, timestamp, merchant_category, state, payment_terminal, card_type, is_fraud, is_outside_business_hours`.
 
 3. **Feature engineering + model training**
-   - Builds training features (`training_features.csv`) with behavioral, velocity, temporal, and risk signals.
+   - Builds training features (`training_features.csv`) with behavioural, velocity, temporal, and risk signals.
    - Trains an ensemble anomaly model (`Isolation Forest + XGBoost`) and persists artifacts to `model_artifacts/anomaly_detector.joblib`.
 
 4. **Serving layer (FastAPI + DuckDB)**
@@ -85,7 +82,7 @@ HOST_PORT=8010 docker compose up --build
 ```
 Open `http://localhost:8010`.
 
-Container startup automatically runs ingestion, feature build, and DuckDB initialization.
+Container startup automatically runs ingestion, feature build, and DuckDB initialisation.
 
 ## Environment and Auth
 - `MERCHANTMIND_ENV=dev` (default): demo auth bypass with default merchant scope (`M00001`).
