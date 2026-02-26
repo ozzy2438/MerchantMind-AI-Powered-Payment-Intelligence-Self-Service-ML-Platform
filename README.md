@@ -9,6 +9,8 @@ The project targets three outcomes:
 - Give merchants self-service answers through SQL/AI agents and a dashboard.
 - Keep ingestion claims technically honest with explicit `live`, `fallback`, and `calibrated` provenance.
 
+[![Watch the demo](https://vumbnail.com/1168345545.jpg)](https://vimeo.com/1168345545)
+
 ## How It Works
 1. **Ingestion + truth model**
    - Runs 7 sources through `run_full_ingestion.py`.
